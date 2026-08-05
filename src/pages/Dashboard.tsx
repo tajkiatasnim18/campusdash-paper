@@ -206,17 +206,16 @@ export default function Dashboard() {
           <StudentHub
             userName={user?.name ?? undefined}
             notices={notices}
-            events={events}
             meal={meal}
             doctors={doctors}
             routes={routes}
             files={files}
+            results={results}
             transportBooked={transportBooked}
             medicalBooked={medicalBooked}
             onClaimMeal={claimMeal}
             onBookTransport={bookTransport}
             onBookMedical={bookMedical}
-            onRegisterEvent={registerEvent}
           />
         )}
         {role === "faculty" && (

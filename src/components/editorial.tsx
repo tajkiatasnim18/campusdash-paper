@@ -65,24 +65,7 @@ export function Masthead({ active = "home" }: { active?: "home" | "blueprint" })
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-6 lg:flex">
-            {(
-              [
-                ["The Problem", "#problem"],
-                ["Modules", "#modules"],
-                ["Medical", "#medical"],
-                ["Blueprint", "#blueprint"],
-                ["Access", "#access"],
-              ] as const
-            ).map(([label, href]) => (
-              <a
-                key={href}
-                href={href}
-                className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink/70 transition-colors hover:text-ink"
-              >
-                {label}
-              </a>
-            ))}
+          <nav className="hidden items-center gap-8 lg:flex">
             <Link
               to="/flowchart"
               className={cn(

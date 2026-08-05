@@ -2,12 +2,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import {
   ArrowRight,
+  Award,
   Bell,
+  BellRing,
   Bus,
-  CalendarDays,
   Check,
   FileText,
-  MapPin,
   NotebookPen,
   Search,
   Sparkles,
@@ -19,8 +19,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Kicker } from "@/components/editorial";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import type { BusRoute, CampusEvent, Doctor, DriveFile, MealState, Notice } from "@/lib/campus-data";
+import type { BusRoute, Doctor, DriveFile, MealState, Notice, ResultRow } from "@/lib/campus-data";
 
 function Card({ title, icon: Icon, children, className }: { title: string; icon: React.ElementType; children: React.ReactNode; className?: string }) {
   return (
@@ -56,33 +64,31 @@ function FakeQr({ seed }: { seed: string }) {
 type Props = {
   userName?: string;
   notices: Notice[];
-  events: CampusEvent[];
   meal: MealState;
   doctors: Doctor[];
   routes: BusRoute[];
   files: DriveFile[];
+  results: ResultRow[];
   transportBooked: { route: string; seat: string; departs: string } | null;
   medicalBooked: { doctor: string; date: string } | null;
   onClaimMeal: () => void;
   onBookTransport: (routeId: number) => void;
   onBookMedical: (doctorId: number) => void;
-  onRegisterEvent: (eventId: number) => void;
 };
 
 export function StudentHub({
   userName,
   notices,
-  events,
   meal,
   doctors,
   routes,
   files,
+  results,
   transportBooked,
   medicalBooked,
   onClaimMeal,
   onBookTransport,
   onBookMedical,
-  onRegisterEvent,
 }: Props) {
   const [noticeQuery, setNoticeQuery] = useState("");
   const [fileQuery, setFileQuery] = useState("");
@@ -96,6 +102,17 @@ export function StudentHub({
   const filteredFiles = files.filter((f) =>
     (f.name + f.folder).toLowerCase().includes(fileQuery.toLowerCase()),
   );
+  const totalPoints = results.reduce((sum, r) => sum + r.points, 0);
+  const totalCredits = results.reduce((sum, r) => sum + r.credits, 0);
+  const cgpa = totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : "—";
+
+  const feed = [
+    ...notices.filter((n) => n.urgent).map((n) => ({ tone: "urgent" as const, text: `URGENT — ${n.title}`, time: n.date })),
+    ...(meal.lastTicket ? [{ tone: "ok" as const, text: `Meal ticket ${meal.lastTicket} claimed — show at the counter`, time: "Today" }] : []),
+    ...(transportBooked ? [{ tone: "ok" as const, text: `Seat ${transportBooked.seat} confirmed — ${transportBooked.route}`, time: "Today" }] : []),
+    ...(medicalBooked ? [{ tone: "ok" as const, text: `Appointment with ${medicalBooked.doctor} booked`, time: "Today" }] : []),
+    { tone: "ok" as const, text: "Semester final results published — see Results", time: "03 Aug" },
+  ];
 
   const askAi = (q: string) => {
     const query = q.toLowerCase();
@@ -112,10 +129,12 @@ export function StudentHub({
       );
     } else if (query.includes("bus") || query.includes("transport")) {
       setAiReply("Route 1 (Campus ⇄ Uttara) departs 7:00 and 14:30. Book a seat from the Transport card — digital QR ticket included.");
+    } else if (query.includes("cgpa") || query.includes("result") || query.includes("grade")) {
+      setAiReply(`Your CGPA for the previous semester is ${cgpa} (${results.length} courses, ${totalCredits} credits). Full grades are on the Results card below.`);
     } else if (query.includes("club") || query.includes("event")) {
-      setAiReply("Clubs publish events from the Event Host desk. Right now TechNova 2026 has 214 of 400 seats registered — join from the Events card.");
+      setAiReply("Club events are announced by Event Hosts — watch your Notifications feed. Hosts manage registrations and payments from the Event Host desk.");
     } else {
-      setAiReply("Here's a start: notices live under the hub feed, files under the Notes Drive, and every booking card shows live counters. Ask me about midterms, meals, buses, or events.");
+      setAiReply("Here's a start: notices live under the hub feed, files under the Notes Drive, and every booking card shows live counters. Ask me about midterms, meals, buses, results, or club events.");
     }
   };
 
@@ -260,7 +279,7 @@ export function StudentHub({
         </Card>
       </div>
 
-      {/* Row 2 — notices + events */}
+      {/* Row 2 — notices + notifications */}
       <div className="grid gap-5 lg:grid-cols-3">
         <Card title="Official notice hub" icon={Bell} className="lg:col-span-2">
           <div className="relative">
@@ -297,39 +316,31 @@ export function StudentHub({
           </ul>
         </Card>
 
-        <Card title="Upcoming events" icon={CalendarDays}>
-          <ul className="space-y-3">
-            {events.map((e) => {
-              const full = e.registered >= e.capacity;
-              return (
-                <li key={e.id} className="border border-ink/20 bg-paper px-3 py-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-newsprint">{e.club}</p>
-                      <p className="mt-0.5 text-[13px] font-medium leading-snug text-ink">{e.title}</p>
-                      <p className="mt-1 flex items-center gap-1 text-[11px] text-ink-soft">
-                        <MapPin className="size-3" /> {e.venue} · {e.date}
-                      </p>
-                      <p className="mt-0.5 text-[11px] text-ink-soft">
-                        {e.registered} / {e.capacity} registered · {e.price === 0 ? "free" : `${e.price} ৳`}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={full}
-                    onClick={() => onRegisterEvent(e.id)}
-                    className="mt-2 w-full rounded-sm border-ink/40 bg-transparent font-mono text-[10px] uppercase tracking-[0.12em] text-ink hover:bg-ink hover:text-paper"
-                  >
-                    {full ? "Full" : "Register"}
-                  </Button>
-                </li>
-              );
-            })}
+        <Card title="Notifications" icon={BellRing}>
+          <ul className="space-y-2">
+            {feed.map((item, i) => (
+              <li
+                key={i}
+                className={cn(
+                  "flex items-start gap-2.5 border px-3 py-2.5",
+                  item.tone === "urgent" ? "border-newsprint/60 bg-newsprint/5" : "border-ink/20 bg-paper",
+                )}
+              >
+                <span
+                  className={cn(
+                    "mt-1 size-1.5 shrink-0",
+                    item.tone === "urgent" ? "bg-newsprint" : "bg-pine",
+                  )}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[12.5px] leading-5 text-ink">{item.text}</p>
+                  <p className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-soft">{item.time}</p>
+                </div>
+              </li>
+            ))}
           </ul>
           <p className="mt-3 border-t border-dashed border-ink/30 pt-2 text-[11px] leading-5 text-ink-soft">
-            Events are published by club hosts from the Event Management desk.
+            Tickets, appointments, and important updates land here automatically.
           </p>
         </Card>
       </div>
@@ -398,7 +409,7 @@ export function StudentHub({
             <div className="mt-4 flex-1 border border-dashed border-ink/30 bg-paper p-4">
               <p className="text-[12px] leading-5 text-ink-soft">Try:</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {["When are midterms?", "Meal counter?", "Bus to Uttara?", "Any club events?"].map((q) => (
+                {["When are midterms?", "Meal counter?", "Bus to Uttara?", "What's my CGPA?"].map((q) => (
                   <button
                     key={q}
                     onClick={() => {
@@ -415,6 +426,39 @@ export function StudentHub({
           )}
         </Card>
       </div>
+
+      {/* Row 4 — results */}
+      <Card title="Result — previous semester" icon={Award}>
+        <div className="overflow-x-auto">
+          <Table className="min-w-[520px]">
+            <TableHeader>
+              <TableRow className="border-ink/30 hover:bg-transparent">
+                <TableHead className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink">Course</TableHead>
+                <TableHead className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink">Title</TableHead>
+                <TableHead className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink">Credits</TableHead>
+                <TableHead className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink">Grade</TableHead>
+                <TableHead className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink">Points</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {results.map((r) => (
+                <TableRow key={r.course} className="border-ink/20 hover:bg-muted/60">
+                  <TableCell className="py-2.5 text-[13px] font-medium text-ink">{r.course}</TableCell>
+                  <TableCell className="py-2.5 text-[13px] text-ink-soft">{r.title}</TableCell>
+                  <TableCell className="py-2.5 text-[13px] text-ink-soft">{r.credits}</TableCell>
+                  <TableCell className="py-2.5 text-[13px] font-semibold text-ink">{r.grade}</TableCell>
+                  <TableCell className="py-2.5 text-[13px] text-ink-soft">{r.points}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <p className="mt-4 border-t border-dashed border-ink/30 pt-3 text-[12.5px] text-ink">
+          CGPA (previous semester):{" "}
+          <span className="font-display text-lg font-bold text-ink">{cgpa}</span>{" "}
+          <span className="text-ink-soft">· {totalCredits} credits · grade review closes 15 Aug</span>
+        </p>
+      </Card>
     </div>
   );
 }

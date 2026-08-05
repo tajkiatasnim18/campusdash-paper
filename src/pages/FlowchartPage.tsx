@@ -8,27 +8,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { accessRows, mergedAdditions } from "@/lib/campus-data";
+import { accessRows, chartChanges } from "@/lib/campus-data";
 import { Check, FileText, Lock, MapPin } from "lucide-react";
 
 const devMap = [
-  { node: "University Portal — one login", page: "App shell + auth gate", route: "everywhere" },
+  { node: "CampusDash — one login", page: "App shell + auth gate", route: "everywhere" },
   { node: "Home Page (all info, public)", page: "Landing page", route: "/" },
-  { node: "Medical Information (public)", page: "Landing section", route: "/#medical" },
+  { node: "Medical Information + AI chatbot (public)", page: "Blueprint — public reference", route: "/flowchart" },
   { node: "Login → Authenticate → Identify Role", page: "Auth page + role routing", route: "/auth → /dashboard" },
   { node: "Student Section", page: "Student Hub workspace", route: "/dashboard · student" },
   { node: "Faculty Section", page: "Faculty Desk workspace", route: "/dashboard · faculty" },
   { node: "Medical Admin Section", page: "Medical Admin panel", route: "/dashboard · medical" },
-  { node: "Event Management (Event Host)", page: "Event Host workspace", route: "/dashboard · host" },
+  { node: "Event Mgmt Section (Event Host)", page: "Event Host workspace", route: "/dashboard · host" },
   { node: "Blueprint & access control", page: "This page", route: "/flowchart" },
 ];
 
 const structure = [
-  { head: "Home Page (Public)", sub: "All information, including Medical Information" },
-  { head: "Login", sub: "Student Login → Student Section" },
-  { head: "Login", sub: "Faculty Login → Faculty Section" },
+  { head: "Home Page (Public)", sub: "All info incl. Medical Info (public) + AI Chatbot" },
+  { head: "Login", sub: "Student Login → Student Section (Notice, Materials, Booking [Meal/Transport/Medical], Result, AI, Notifications)" },
+  { head: "Login", sub: "Faculty Login → Faculty Section (Notice, Materials, Result, AI)" },
   { head: "Login", sub: "Medical Admin Login → Medical Admin Section" },
-  { head: "Login", sub: "Event Host Login → Event Management + Student Section" },
+  { head: "Login", sub: "Event Host Login → Event Mgmt Section + Student Section (dual access)" },
   { head: "Contact", sub: "Contact information & quick links" },
 ];
 
@@ -48,17 +48,16 @@ export default function FlowchartPage() {
           <div className="mt-6 grid gap-8 lg:grid-cols-5">
             <p className="max-w-xl text-[15px] leading-7 text-ink-soft lg:col-span-3">
               The original hand-drawn chart is preserved node-for-node — public Home Page,
-              Login → Authenticate → Identify Role, and the role-based sections. Everything the
-              <span className="font-medium text-ink"> CampusDash brief</span> adds beyond the chart
-              (AI, bookings, live counters, the Notes Drive, event management) has been folded in
-              and marked <NewTag />. Event management now lives in its own role column after
-              “Identify User Role”, exactly as requested — event hosts are all students, so the
-              column carries full access to the Student Section too.
+              Login → Authenticate → Identify Role, and the role-based sections. The updated
+              reference moves <span className="font-medium text-ink">Club / Event out of the Student Section</span>{" "}
+              into its own <span className="font-medium text-ink">Event Host</span> role branch after
+              “Identify User Role” — hosts are all students, so the column carries dual access into
+              the Student Section. Every addition from the CampusDash brief is marked <NewTag />.
             </p>
             <div className="border border-ink/40 bg-sheet p-5 lg:col-span-2">
               <p className="kicker">At a glance</p>
               <ul className="mt-3 space-y-2 text-[13px] leading-6 text-ink/90">
-                <li className="flex gap-2"><Lock className="mt-0.5 size-3.5 shrink-0 text-newsprint" /> Public: Home Page + Medical Information</li>
+                <li className="flex gap-2"><Lock className="mt-0.5 size-3.5 shrink-0 text-newsprint" /> Public: Home Page + Medical Info + AI chatbot</li>
                 <li className="flex gap-2"><Check className="mt-0.5 size-3.5 shrink-0 text-pine" /> Login required: 4 role-based sections</li>
                 <li className="flex gap-2"><MapPin className="mt-0.5 size-3.5 shrink-0 text-ink-soft" /> NITER campus — built to grow beyond it</li>
               </ul>
@@ -66,28 +65,31 @@ export default function FlowchartPage() {
           </div>
         </div>
 
-        {/* Merged additions */}
+        {/* Changes made to original chart */}
         <section className="pt-12">
           <SectionHead
-            kicker="Merged from the brief"
-            title="What the CampusDash doc adds to the flowchart"
-            desc="Seven additions from the brief were not present in the hand-drawn chart. Each is tagged with a red NEW marker in the flowchart below."
+            kicker="For dev reference"
+            title="Changes made to the original chart"
+            desc="The updated reference chart, summarized for development. Each change is tagged in the flowchart below."
           />
-          <div className="mt-8 grid gap-px overflow-hidden border border-ink/40 bg-ink/15 sm:grid-cols-2 lg:grid-cols-4">
-            {mergedAdditions.map((add) => (
-              <div key={add.title} className="flex flex-col gap-2 bg-paper p-5">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-display text-[15px] font-semibold leading-snug text-ink">
-                    {add.title}
-                  </p>
-                  {add.highlight ? <NewTag /> : null}
-                </div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-newsprint">
-                  {add.where}
-                </p>
-                <p className="text-[13px] leading-6 text-ink-soft">{add.note}</p>
-              </div>
-            ))}
+          <div className="mt-8 border border-dashed border-pine/60 bg-sheet p-6 sm:p-8">
+            <ol className="space-y-4">
+              {chartChanges.map((change, i) => (
+                <li key={change.title} className="flex gap-4">
+                  <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center border border-pine/60 font-mono text-[11px] font-semibold text-pine">
+                    {i + 1}
+                  </span>
+                  <div>
+                    <p className="flex flex-wrap items-center gap-2 text-[14px] font-semibold text-ink">
+                      {change.title}
+                      {change.highlight && <NewTag />}
+                    </p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-newsprint">{change.where}</p>
+                    <p className="mt-1 text-[13px] leading-6 text-ink-soft">{change.note}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
 
@@ -154,10 +156,10 @@ export default function FlowchartPage() {
                   key={i}
                   className="flex items-baseline justify-between gap-4 border-b border-ink/20 px-4 py-3 last:border-b-0"
                 >
-                  <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-ink">
+                  <span className="shrink-0 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-ink">
                     {row.head}
                   </span>
-                  <span className="text-right text-[13px] leading-5 text-ink-soft">{row.sub}</span>
+                  <span className="text-right text-[12.5px] leading-5 text-ink-soft">{row.sub}</span>
                 </li>
               ))}
             </ul>
@@ -199,10 +201,11 @@ export default function FlowchartPage() {
           <div className="border-2 border-ink bg-sheet p-6 sm:p-8">
             <p className="kicker-red">Note — appended to the chart</p>
             <p className="mt-3 max-w-3xl text-[15px] leading-7 text-ink">
-              Medical information is available to all users on the Home Page — no login required.
-              Login is required only for Student, Faculty, Medical Admin, and Event Host access.
-              Event Hosts are students first: signing in opens both the Event Management workspace
-              and the full Student Section.
+              Medical info stays public on the Home Page — no login required. Event Host is a
+              special case: since every event host is also a student, that account gets the Event
+              Mgmt Section <em>and</em> the Student Section. Club / Event was removed from the plain
+              Student Section list and now lives under its own role branch after “Identify User
+              Role”.
             </p>
           </div>
         </section>

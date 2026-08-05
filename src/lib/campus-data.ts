@@ -321,31 +321,31 @@ export const accessRows = [
   {
     role: "Visitor (Public)",
     login: "No",
-    access: "View all information on the Home Page, including Medical Information.",
+    access: "View Home Page: overview, contact, AI chatbot, Medical Info (public).",
     isNew: false,
   },
   {
     role: "Student",
     login: "Yes — University ID",
-    access: "Student Section: Notice, Materials, Booking, Club, Result + AI assistant.",
+    access: "Student Section: Notice, Materials, Booking [Meal/Transport/Medical], Result, AI, Notifications — Club/Event no longer here.",
     isNew: false,
   },
   {
     role: "Faculty / Teacher",
     login: "Yes — Faculty ID",
-    access: "Faculty Section: Notice (publish), Materials (share), Result.",
+    access: "Faculty Section: Notice, Materials, Result, AI Assistant.",
     isNew: false,
   },
   {
     role: "Medical Admin (Host)",
     login: "Yes — Admin ID",
-    access: "Medical Admin Section: update & manage medical information, availability, visits.",
+    access: "Medical Admin Section: update/manage info, availability & appointment activity.",
     isNew: false,
   },
   {
     role: "Event Host",
-    login: "Yes — University ID",
-    access: "Event Management workspace — plus full Student Section (hosts are all students).",
+    login: "Yes — Student ID",
+    access: "Event Mgmt Section (announcements, registration & payment, club dashboard, finance tracking) + Student Section (dual access).",
     isNew: true,
   },
 ];
@@ -371,42 +371,38 @@ export const benefits = {
   ],
 };
 
-// What was added to the flowchart from the CampusDash brief (displayed on the blueprint page)
-export const mergedAdditions = [
+// Changes made to the original chart, per the updated reference (blueprint page)
+export const chartChanges = [
   {
-    title: "Centralized AI layer",
-    where: "Student & Faculty sections",
-    note: "Smart search, document summarization, campus chatbot, suggestions.",
+    title: "Centralized AI added",
+    where: "Home Page + Student & Faculty dashboards",
+    note: "Smart search, document summarization, campus chatbot, personalized suggestions — a public chatbot on the Home Page too.",
   },
   {
-    title: "Medical appointment booking",
-    where: "Student → Booking · Medical Admin",
-    note: "Doctor availability, online booking, reminders, privacy-controlled visit support.",
-  },
-  {
-    title: "Transport online ticket",
-    where: "Student → Booking",
-    note: "Routes & schedules, capacity-aware seat booking, digital QR ticket, bus tracking.",
-  },
-  {
-    title: "Online meal ticket",
-    where: "Student → Booking",
-    note: "Digital tickets with a live meal-ratio counter for remaining slots.",
-  },
-  {
-    title: "Notes Drive · Notes Engine · PDF Maker",
+    title: "Materials expanded",
     where: "Student & Faculty → Materials",
-    note: "Folders, sharing, access control, AI tagging & summarization, PDF generation.",
+    note: "PDF & Notes Drive, Notes Engine, PDF Maker, content-aware search.",
   },
   {
-    title: "Notice hub upgrades",
-    where: "Student & Faculty → Notice",
-    note: "Categories, search, urgent/high-priority alerts, teacher publishing.",
+    title: "Booking expanded",
+    where: "Student → Booking",
+    note: "Meal Ticket (live ratio), Transport Ticket (routes, QR, tracking), Medical Appointment (availability, reminders).",
   },
   {
-    title: "Event Host role (new column)",
+    title: "Medical Admin Section expanded",
+    where: "Medical Admin column",
+    note: "Availability management, appointment tracking, privacy-controlled visit activity.",
+  },
+  {
+    title: "Club removed from Student Section",
+    where: "Student Section",
+    note: "Club/Event no longer sits in the plain Student Section list.",
+    highlight: true,
+  },
+  {
+    title: "Event Host role added",
     where: "After “Identify User Role”",
-    note: "Event management moved out of the Student Section per request — hosts are all students and keep full Student access.",
+    note: "New sibling role with an Event Mgmt Section and dual access into the Student Section.",
     highlight: true,
   },
 ];

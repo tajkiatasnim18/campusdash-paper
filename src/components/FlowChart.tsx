@@ -46,6 +46,19 @@ function Item({ n, label, isNew }: { n: string; label: string; isNew?: boolean }
   );
 }
 
+function SectionNote({ children, tone = "plain" }: { children: ReactNode; tone?: "plain" | "red" }) {
+  return (
+    <p
+      className={cn(
+        "mt-3 border-t border-dashed pt-2 text-center font-mono text-[9.5px] uppercase leading-4 tracking-[0.12em]",
+        tone === "red" ? "border-newsprint/50 text-newsprint" : "border-ink/35 text-ink-soft",
+      )}
+    >
+      {children}
+    </p>
+  );
+}
+
 function Branch({ cols, children }: { cols: 2 | 4; children: ReactNode }) {
   return (
     <div className="relative">
@@ -75,7 +88,7 @@ function RootBox() {
     <div className="mx-auto w-fit border-2 border-ink bg-sheet p-[6px]">
       <div className="border border-ink px-8 py-3 text-center sm:px-12">
         <p className="font-display text-lg font-bold tracking-wide text-ink sm:text-xl">
-          UNIVERSITY PORTAL
+          CAMPUSDASH
         </p>
         <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.24em] text-ink-soft">
           One login · four desks
@@ -91,6 +104,7 @@ const homeItems = [
   "Features / Facilities",
   "Contact Information",
   "Quick Links",
+  { label: "Campus AI Chatbot — schedules, how-to, locations", isNew: true },
 ];
 
 const medicalItems = [
@@ -109,9 +123,13 @@ function HomePageBox() {
         Home Page
       </NodeTitle>
       <ul className="mt-4 space-y-1.5 border-t border-ink/25 pt-3">
-        {homeItems.map((item, i) => (
-          <Item key={item} n={String(i + 1)} label={item} />
-        ))}
+        {homeItems.map((item, i) =>
+          typeof item === "string" ? (
+            <Item key={item} n={String(i + 1)} label={item} />
+          ) : (
+            <Item key={item.label} n={String(i + 1)} label={item.label} isNew />
+          ),
+        )}
       </ul>
 
       <FlowBox variant="dash" className="mt-4 p-4">
@@ -123,9 +141,22 @@ function HomePageBox() {
             <Item key={item} n={String(i + 1)} label={item} />
           ))}
         </ul>
-        <p className="mt-3 border-t border-dashed border-ink/40 pt-2 text-center font-mono text-[9.5px] uppercase tracking-[0.16em] text-newsprint">
-          No login required — public access
+        <SectionNote tone="red">No login required — public access</SectionNote>
+        <p className="mt-2 text-center font-mono text-[9.5px] uppercase leading-4 tracking-[0.12em] text-ink-soft">
+          Doctor availability preview only — booking needs login <NewTag />
         </p>
+      </FlowBox>
+
+      <FlowBox variant="dash" className="mt-4 p-4">
+        <p className="flex items-center justify-center gap-2 text-center font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-ink">
+          Centralized AI <NewTag />
+        </p>
+        <ul className="mt-3 space-y-1.5">
+          <Item n="1" label="Smart search across notices, notes, and PDFs" />
+          <Item n="2" label="Summarization of documents and lecture materials" />
+          <Item n="3" label="Personalized suggestions: events, notices, study material" />
+        </ul>
+        <SectionNote>Available inside both Student and Faculty dashboards</SectionNote>
       </FlowBox>
     </FlowBox>
   );
@@ -166,11 +197,14 @@ function RoleDivider() {
 
 type RoleDef = {
   name: string;
+  nameSub?: string;
   note?: string;
   dash: string;
   dashSub?: string;
   sectionTitle: string;
   items: { n: string; label: string; isNew?: boolean }[];
+  sectionNote?: string;
+  sectionNoteTone?: "plain" | "red";
 };
 
 const roles: RoleDef[] = [
@@ -180,13 +214,23 @@ const roles: RoleDef[] = [
     dashSub: "Today's campus, at a glance",
     sectionTitle: "Student Section",
     items: [
-      { n: "1", label: "Notice — official hub; categories, search, urgent alerts", isNew: true },
-      { n: "2", label: "Materials — Notes Drive · Notes Engine · PDF Maker", isNew: true },
-      { n: "3", label: "Booking — meal tickets · transport · medical", isNew: true },
-      { n: "4", label: "Club — join clubs & browse events" },
-      { n: "5", label: "Result" },
-      { n: "6", label: "AI assistant — search, summarize, ask", isNew: true },
+      { n: "1", label: "Notice" },
+      {
+        n: "2",
+        label: "Materials — PDF & Notes Drive, Notes Engine, PDF Maker, content search",
+        isNew: true,
+      },
+      {
+        n: "3",
+        label: "Booking — Meal Ticket, Transport Ticket, Medical Appointment",
+        isNew: true,
+      },
+      { n: "4", label: "Result" },
+      { n: "5", label: "AI Assistant — search / summarize / chat", isNew: true },
+      { n: "6", label: "Notifications — tickets, appointments, updates", isNew: true },
     ],
+    sectionNote: "Club / Event removed — see Event Host",
+    sectionNoteTone: "red",
   },
   {
     name: "Faculty / Teacher",
@@ -194,36 +238,51 @@ const roles: RoleDef[] = [
     dashSub: "Publish, share, and track",
     sectionTitle: "Faculty Section",
     items: [
-      { n: "1", label: "Notice — publish official notices & alerts", isNew: true },
-      { n: "2", label: "Materials — share PDFs & notes via the Drive", isNew: true },
+      { n: "1", label: "Notice — publish official notices" },
+      {
+        n: "2",
+        label: "Materials — upload/share PDFs & Notes, Notes Engine, PDF Maker",
+        isNew: true,
+      },
       { n: "3", label: "Result" },
+      { n: "4", label: "AI Assistant — search / summarize / chat", isNew: true },
     ],
+    sectionNote: "Reduces admin & coordination friction",
   },
   {
-    name: "Medical Admin (Host)",
+    name: "Medical Admin",
+    nameSub: "(Host)",
     dash: "Medical Admin Panel",
     dashSub: "Update medical info",
     sectionTitle: "Medical Admin Section",
     items: [
       { n: "1", label: "Update medical information" },
-      { n: "2", label: "Manage medical content" },
-      { n: "3", label: "Doctor availability & appointments", isNew: true },
-      { n: "4", label: "Visit support (privacy-controlled)", isNew: true },
+      { n: "2", label: "Manage doctor / staff availability", isNew: true },
+      { n: "3", label: "Track appointment bookings & reminders", isNew: true },
+      { n: "4", label: "View visit activity, privacy-controlled", isNew: true },
+      { n: "5", label: "Manage medical content shown on Home Page" },
     ],
   },
   {
     name: "Event Host",
-    note: "Hosts are all students — they keep full access to the Student Section",
-    dash: "Event Management Workspace",
+    nameSub: "(Club / Event Manager)",
+    note: "Event Host = a Student → dual access below",
+    dash: "Event Host Dashboard",
     dashSub: "Run clubs, events, and payments",
-    sectionTitle: "Event Management",
+    sectionTitle: "Event Mgmt Section",
     items: [
-      { n: "1", label: "Create & publish club events", isNew: true },
-      { n: "2", label: "Registrations & online payment", isNew: true },
-      { n: "3", label: "Member lists & roles (admin / member)", isNew: true },
-      { n: "4", label: "Finance tracking for paid events", isNew: true },
-      { n: "5", label: "Personalized club dashboards", isNew: true },
+      { n: "1", label: "Event Announcements — create & publish", isNew: true },
+      { n: "2", label: "Online Registration & Payment", isNew: true },
+      {
+        n: "3",
+        label: "Personalized Club Dashboard — member list, roles: admin / member",
+        isNew: true,
+      },
+      { n: "4", label: "Event Planning", isNew: true },
+      { n: "5", label: "Finance Tracking for paid events", isNew: true },
     ],
+    sectionNote: "Event Host can also access the Student Section",
+    sectionNoteTone: "red",
   },
 ];
 
@@ -232,7 +291,7 @@ function RoleColumn({ role }: { role: RoleDef }) {
     <div className="flex h-full flex-col items-stretch">
       <FlowBox className="px-5 py-3 text-center">
         <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-ink">
-          {role.name}
+          {role.name} {role.nameSub && <span className="text-ink-soft">{role.nameSub}</span>}
         </p>
       </FlowBox>
       {role.note && (
@@ -254,6 +313,9 @@ function RoleColumn({ role }: { role: RoleDef }) {
             <Item key={item.n} n={item.n} label={item.label} isNew={item.isNew} />
           ))}
         </ul>
+        {role.sectionNote && (
+          <SectionNote tone={role.sectionNoteTone ?? "plain"}>{role.sectionNote}</SectionNote>
+        )}
       </FlowBox>
       <VConnector className="h-4" />
       <FlowBox variant="muted" className="px-5 py-2 text-center">
@@ -273,10 +335,10 @@ function FlowLegend() {
           <span className="size-1.5 bg-newsprint" /> Added from the CampusDash brief
         </span>
         <span className="flex items-center gap-2">
-          <span className="inline-block h-3 w-3 border-2 border-ink" /> Double rule — portal entry
+          <span className="inline-block h-3 w-3 border-2 border-ink" /> Original structure
         </span>
         <span className="flex items-center gap-2">
-          <span className="inline-block h-3 w-3 border border-dashed border-ink/70" /> Public / shared content
+          <span className="inline-block h-3 w-3 border border-dashed border-newsprint/70" /> Club / Event restructuring
         </span>
       </div>
     </div>
