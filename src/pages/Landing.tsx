@@ -49,7 +49,7 @@ export default function Landing() {
                 variant="outline"
                 className="rounded-sm border-ink/40 bg-transparent px-6 font-mono text-[12px] uppercase tracking-[0.16em] text-ink hover:bg-ink hover:text-paper"
               >
-                <Link to="/flowchart">Read the blueprint</Link>
+                <Link to="/dashboard">Jump straight in</Link>
               </Button>
             </div>
 
@@ -124,7 +124,7 @@ export default function Landing() {
               variant="outline"
               className="rounded-sm border-ink/40 bg-transparent px-8 font-mono text-[12px] uppercase tracking-[0.16em] text-ink hover:bg-ink hover:text-paper"
             >
-              <Link to="/flowchart">The full blueprint</Link>
+              <Link to="/dashboard">Jump straight in</Link>
             </Button>
           </div>
         </div>
@@ -148,8 +148,8 @@ export default function Landing() {
                 <p className="kicker">The paper</p>
                 <ul className="mt-3 space-y-2 text-[13px] text-ink/80">
                   <li><Link to="/" className="hover:text-ink">Front page</Link></li>
-                  <li><Link to="/flowchart" className="hover:text-ink">The blueprint</Link></li>
-                  <li><Link to="/flowchart" className="hover:text-ink">Medical info</Link></li>
+                  <li><Link to="/dashboard" className="hover:text-ink">The portal</Link></li>
+                  <li><Link to="/dashboard/student/medical" className="hover:text-ink">Medical info</Link></li>
                 </ul>
               </div>
               <div>

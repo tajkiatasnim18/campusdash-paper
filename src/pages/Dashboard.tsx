@@ -1,141 +1,37 @@
-import { useMemo, useState } from "react";
-import { toast } from "sonner";
-import { Link, useNavigate } from "react-router";
-import { GraduationCap, HeartPulse, LogOut, Megaphone, PartyPopper } from "lucide-react";
+import { Link, Navigate, useNavigate, useParams } from "react-router";
+import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { StudentHub } from "@/components/dashboard/StudentHub";
-import { FacultyDesk } from "@/components/dashboard/FacultyDesk";
-import { MedicalAdminDesk } from "@/components/dashboard/MedicalAdminDesk";
-import { EventHostDesk } from "@/components/dashboard/EventHostDesk";
+import { PortalProvider } from "@/components/portal/portal-context";
+import { ROLE_MODULES } from "@/components/portal/registry";
+import { getModule, getRole, PORTAL_ROLES } from "@/lib/portal";
 import { cn } from "@/lib/utils";
-import {
-  seedClubs,
-  seedDoctors,
-  seedEvents,
-  seedFiles,
-  seedMeal,
-  seedMedicalTips,
-  seedNotices,
-  seedResults,
-  seedRoutes,
-  type BusRoute,
-  type CampusEvent,
-  type Doctor,
-  type DriveFile,
-  type MealState,
-  type Notice,
-} from "@/lib/campus-data";
-
-type RoleKey = "student" | "faculty" | "medical" | "host";
-
-const ROLES: { key: RoleKey; label: string; sub: string; icon: React.ElementType }[] = [
-  { key: "student", label: "Student", sub: "Student Section", icon: GraduationCap },
-  { key: "faculty", label: "Faculty / Teacher", sub: "Faculty Section", icon: Megaphone },
-  { key: "medical", label: "Medical Admin", sub: "Medical Admin Section", icon: HeartPulse },
-  { key: "host", label: "Event Host", sub: "Event Management", icon: PartyPopper },
-];
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const [role, setRole] = useState<RoleKey>("student");
+  const params = useParams();
+  const splat = params["*"] ?? "";
+  const [rawRole, rawModule] = splat.split("/");
 
-  // Shared demo state — mirrors what would live in Convex tables.
-  const [notices, setNotices] = useState<Notice[]>(seedNotices);
-  const [events, setEvents] = useState<CampusEvent[]>(seedEvents);
-  const [meal, setMeal] = useState<MealState>(seedMeal);
-  const [doctors, setDoctors] = useState<Doctor[]>(seedDoctors);
-  const [routes, setRoutes] = useState<BusRoute[]>(seedRoutes);
-  const [medicalTips, setMedicalTips] = useState<string[]>(seedMedicalTips);
-  const [transportBooked, setTransportBooked] = useState<{ route: string; seat: string; departs: string } | null>(null);
-  const [medicalBooked, setMedicalBooked] = useState<{ doctor: string; date: string } | null>(null);
+  const validRole = getRole(rawRole);
+  if (rawRole && !validRole) {
+    return <Navigate to="/dashboard/student" replace />;
+  }
 
-  const files = useMemo(() => seedFiles, []);
-  const results = useMemo(() => seedResults, []);
-  const clubs = useMemo(() => seedClubs, []);
+  const role = validRole ?? getRole("student")!;
+  const module = getModule(role, rawModule);
+  if (rawModule && rawModule !== module.id) {
+    return <Navigate to={`/dashboard/${role.key}/${module.id}`} replace />;
+  }
+
+  const Page = ROLE_MODULES[role.key]?.[module.id];
+  const active = role.modules.findIndex((m) => m.id === module.id);
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
   };
-
-  const claimMeal = () => {
-    setMeal((prev) => {
-      if (prev.claimed >= prev.total) return prev;
-      const ticket = `M-${String(prev.claimed + 1).padStart(3, "0")}`;
-      toast.success(`Lunch ticket ${ticket} claimed — show it at the counter.`);
-      return { ...prev, claimed: prev.claimed + 1, lastTicket: ticket };
-    });
-  };
-
-  const bookTransport = (routeId: number) => {
-    const route = routes.find((r) => r.id === routeId);
-    if (!route || route.free <= 0) return;
-    const seat = `T-${routeId}-${String(route.seats - route.free).padStart(2, "0")}`;
-    setRoutes((prev) => prev.map((r) => (r.id === routeId ? { ...r, free: r.free - 1 } : r)));
-    setTransportBooked({ route: route.name, seat, departs: route.departs });
-    toast.success(`Seat ${seat} confirmed on ${route.name}. QR ticket ready.`);
-  };
-
-  const bookMedical = (doctorId: number) => {
-    const doc = doctors.find((d) => d.id === doctorId);
-    if (!doc || !doc.available) return;
-    setMedicalBooked({ doctor: doc.name, date: "Tomorrow, 11:00 am" });
-    toast.success(`Appointment with ${doc.name} booked — reminder will follow.`);
-  };
-
-  const registerEvent = (eventId: number) => {
-    setEvents((prev) =>
-      prev.map((e) =>
-        e.id === eventId && e.registered < e.capacity
-          ? { ...e, registered: e.registered + 1 }
-          : e,
-      ),
-    );
-    toast.success("Registered! Your seat is held — payment link sent.");
-  };
-
-  const publishNotice = (n: { title: string; category: string; body: string; urgent: boolean }) => {
-    setNotices((prev) => [
-      {
-        id: Date.now(),
-        title: n.title,
-        category: n.category,
-        urgent: n.urgent,
-        body: n.body,
-        date: "05 Aug 2026",
-        author: "Faculty Desk",
-      },
-      ...prev,
-    ]);
-  };
-
-  const toggleDoctor = (id: number) => {
-    setDoctors((prev) => prev.map((d) => (d.id === id ? { ...d, available: !d.available } : d)));
-  };
-
-  const addTip = (tip: string) => setMedicalTips((prev) => [...prev, tip]);
-  const removeTip = (index: number) =>
-    setMedicalTips((prev) => prev.filter((_, i) => i !== index));
-
-  const addEvent = (e: { club: string; title: string; date: string; venue: string; price: number; capacity: number }) => {
-    setEvents((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        club: e.club,
-        title: e.title,
-        date: e.date,
-        venue: e.venue,
-        price: e.price,
-        capacity: e.capacity,
-        registered: 0,
-      },
-    ]);
-  };
-
-  const active = ROLES.find((r) => r.key === role)!;
 
   return (
     <div className="min-h-screen bg-paper">
@@ -147,11 +43,11 @@ export default function Dashboard() {
               Campus<span className="text-newsprint">Dash</span>
             </span>
             <span className="hidden font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft sm:inline">
-              {active.sub} · {active.label}
+              {role.sub} · {module.label}
             </span>
           </Link>
           <div className="flex items-center gap-3">
-            <span className="hidden font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft sm:inline">
+            <span className="hidden font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft md:inline">
               {user?.email ?? "Signed in"}
             </span>
             <Button
@@ -166,7 +62,6 @@ export default function Dashboard() {
             </Button>
           </div>
         </div>
-        {/* Dateline */}
         <div className="border-t border-ink/40">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-soft sm:px-6">
             <span>Portal edition — one login, four desks</span>
@@ -179,67 +74,83 @@ export default function Dashboard() {
       <div className="border-b border-ink/60 bg-sheet">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <nav className="flex items-stretch gap-1 overflow-x-auto" aria-label="Role switcher">
-            {ROLES.map((r) => {
-              const isActive = r.key === role;
-              return (
-                <button
-                  key={r.key}
-                  onClick={() => setRole(r.key)}
-                  className={cn(
-                    "flex shrink-0 items-center gap-2 border-x border-transparent px-4 py-3 font-mono text-[10.5px] uppercase tracking-[0.16em] transition-colors sm:px-5",
-                    isActive
-                      ? "border-x-ink/30 bg-ink text-paper"
-                      : "text-ink-soft hover:bg-muted hover:text-ink",
-                  )}
-                >
-                  <r.icon className="size-3.5" />
-                  {r.label}
-                </button>
-              );
-            })}
+            {PORTAL_ROLES.map((r) => (
+              <Link
+                key={r.key}
+                to={`/dashboard/${r.key}`}
+                className={cn(
+                  "flex shrink-0 items-center gap-2 border-x border-transparent px-4 py-3 font-mono text-[10.5px] uppercase tracking-[0.16em] transition-colors sm:px-5",
+                  r.key === role.key
+                    ? "border-x-ink/30 bg-ink text-paper"
+                    : "text-ink-soft hover:bg-muted hover:text-ink",
+                )}
+              >
+                {r.label}
+              </Link>
+            ))}
           </nav>
         </div>
       </div>
 
-      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-        {role === "student" && (
-          <StudentHub
-            userName={user?.name ?? undefined}
-            notices={notices}
-            meal={meal}
-            doctors={doctors}
-            routes={routes}
-            files={files}
-            results={results}
-            transportBooked={transportBooked}
-            medicalBooked={medicalBooked}
-            onClaimMeal={claimMeal}
-            onBookTransport={bookTransport}
-            onBookMedical={bookMedical}
-          />
-        )}
-        {role === "faculty" && (
-          <FacultyDesk notices={notices} files={files} results={results} onPublishNotice={publishNotice} />
-        )}
-        {role === "medical" && (
-          <MedicalAdminDesk
-            medicalTips={medicalTips}
-            doctors={doctors}
-            medicalBooked={medicalBooked}
-            onToggleDoctor={toggleDoctor}
-            onAddTip={addTip}
-            onRemoveTip={removeTip}
-          />
-        )}
-        {role === "host" && (
-          <EventHostDesk events={events} clubs={clubs} onAddEvent={addEvent} onRegisterEvent={registerEvent} />
-        )}
+      <PortalProvider>
+        <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+          <div className="grid gap-8 lg:grid-cols-[230px_1fr]">
+            {/* Module sidebar — table of contents */}
+            <aside className="lg:sticky lg:top-6 lg:self-start">
+              <p className="kicker">The {role.label} desk</p>
+              {/* mobile: horizontal chips */}
+              <div className="mt-3 flex gap-1.5 overflow-x-auto pb-2 lg:hidden">
+                {role.modules.map((m, i) => (
+                  <Link
+                    key={m.id}
+                    to={`/dashboard/${role.key}/${m.id}`}
+                    className={cn(
+                      "shrink-0 border px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] transition-colors",
+                      m.id === module.id ? "border-ink bg-ink text-paper" : "border-ink/30 bg-sheet text-ink-soft hover:bg-muted",
+                    )}
+                  >
+                    {i + 1}. {m.label}
+                  </Link>
+                ))}
+              </div>
+              {/* desktop: numbered list */}
+              <ul className="mt-3 hidden space-y-0.5 lg:block">
+                {role.modules.map((m, i) => (
+                  <li key={m.id}>
+                    <Link
+                      to={`/dashboard/${role.key}/${m.id}`}
+                      className={cn(
+                        "flex items-center gap-2.5 border-l-2 px-3 py-2 text-[12.5px] transition-colors",
+                        m.id === module.id
+                          ? "border-ink bg-sheet text-ink"
+                          : "border-transparent text-ink-soft hover:border-ink/40 hover:bg-muted hover:text-ink",
+                      )}
+                    >
+                      <span className="font-mono text-[10px] text-ink-soft">{i + 1}.</span>
+                      <m.icon className={cn("size-3.5 shrink-0", m.id === module.id ? "text-newsprint" : "text-ink/40")} />
+                      {m.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6 hidden border border-dashed border-ink/40 bg-paper/60 p-3 lg:block">
+                <p className="font-mono text-[9.5px] uppercase leading-4 tracking-[0.12em] text-ink-soft">
+                  {role.label === "Event Host"
+                    ? "Hosts are students — the Student Section stays available alongside this desk."
+                    : `Module ${active + 1} of ${role.modules.length} in the ${role.sub}.`}
+                </p>
+              </div>
+            </aside>
 
-        <p className="mt-14 border-t border-ink/30 pt-4 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft">
-          Demo runs on seeded data — notices, events, and counters swap for Convex tables when the
-          backend is wired.
-        </p>
-      </main>
+            {/* Content */}
+            <div className="min-w-0">{Page ? <Page /> : null}</div>
+          </div>
+
+          <p className="mt-14 border-t border-ink/30 pt-4 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft">
+            Demo runs on seeded data — every module swaps for a Convex table when the backend is wired.
+          </p>
+        </main>
+      </PortalProvider>
     </div>
   );
 }

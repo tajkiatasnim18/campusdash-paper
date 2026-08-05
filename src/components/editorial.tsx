@@ -67,13 +67,13 @@ export function Masthead({ active = "home" }: { active?: "home" | "blueprint" })
 
           <nav className="hidden items-center gap-8 lg:flex">
             <Link
-              to="/flowchart"
+              to="/dashboard"
               className={cn(
                 "font-mono text-[11px] uppercase tracking-[0.18em] transition-colors",
                 active === "blueprint" ? "text-newsprint" : "text-ink/70 hover:text-ink",
               )}
             >
-              Full blueprint
+              The portal
             </Link>
           </nav>
 

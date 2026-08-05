@@ -1,6 +1,6 @@
-// Seed data and shared types for the CampusDash demo.
-// These mirror the modules described in the CampusDash brief and the merged
-// flowchart — swap for Convex tables when wiring the real backend.
+// Seed data and shared types for the CampusDash portal pages.
+// These mirror the modules in the flowchart — swap for Convex tables when
+// wiring the real backend.
 
 export type Notice = {
   id: number;
@@ -146,14 +146,15 @@ export type DriveFile = {
   folder: string;
   size: string;
   kind: "pdf" | "note";
+  shared?: boolean;
 };
 
 export const seedFiles: DriveFile[] = [
-  { id: 1, name: "Data Structures — Lecture 12.pdf", folder: "CSE 201", size: "1.4 MB", kind: "pdf" },
-  { id: 2, name: "OOP Midterm Short Notes", folder: "CSE 203", size: "24 KB", kind: "note" },
-  { id: 3, name: "Physics Lab Manual 2026.pdf", folder: "PHY 101", size: "3.1 MB", kind: "pdf" },
-  { id: 4, name: "Linear Algebra — Problem Set 4", folder: "MATH 205", size: "18 KB", kind: "note" },
-  { id: 5, name: "Thermodynamics Slides (Week 6).pdf", folder: "ME 110", size: "2.2 MB", kind: "pdf" },
+  { id: 1, name: "Data Structures — Lecture 12.pdf", folder: "CSE 201", size: "1.4 MB", kind: "pdf", shared: true },
+  { id: 2, name: "OOP Midterm Short Notes", folder: "CSE 203", size: "24 KB", kind: "note", shared: true },
+  { id: 3, name: "Physics Lab Manual 2026.pdf", folder: "PHY 101", size: "3.1 MB", kind: "pdf", shared: false },
+  { id: 4, name: "Linear Algebra — Problem Set 4", folder: "MATH 205", size: "18 KB", kind: "note", shared: false },
+  { id: 5, name: "Thermodynamics Slides (Week 6).pdf", folder: "ME 110", size: "2.2 MB", kind: "pdf", shared: true },
 ];
 
 export type ResultRow = {
@@ -197,212 +198,107 @@ export type MealState = { total: number; claimed: number; lastTicket?: string };
 
 export const seedMeal: MealState = { total: 200, claimed: 137 };
 
-// ─── Editorial content (from the CampusDash brief) ──────────────────────────
+// ─── New seeds for the flowchart-driven pages ─────────────────────────────
 
-export const problemRows = [
-  {
-    area: "Academic",
-    student: "Scattered notices; notes & PDFs on personal devices; hard to find materials.",
-    staff: "Hard to distribute materials and official notices reliably to everyone.",
-  },
-  {
-    area: "Health",
-    student: "Difficult to book medical appointments; unclear doctor availability.",
-    staff: "Manual coordination of appointments and limited visibility of activity.",
-  },
-  {
-    area: "Transport",
-    student: "Uncertain schedules; no easy seat booking or bus tracking.",
-    staff: "Little real-time insight into demand and capacity.",
-  },
-  {
-    area: "Meals",
-    student: "Paper/informal tickets; no live view of remaining meal slots.",
-    staff: "Hard to forecast demand; queues and waste.",
-  },
-  {
-    area: "Clubs & Events",
-    student: "Manual registration and payment for events.",
-    staff: "Clubs struggle with member lists, event tracking, and payments.",
-  },
-];
-
-export const modules = [
-  {
-    no: "4.1",
-    title: "Centralized AI",
-    blurb: "An AI layer inside the dashboard that helps both students and teachers.",
-    items: [
-      "Smart search across notices, notes, and PDFs",
-      "Summarization of long documents and lectures",
-      "Campus chatbot for schedules, how-tos, locations",
-      "Suggestions for events, notices, study materials",
-    ],
-  },
-  {
-    no: "4.2",
-    title: "Student Hub",
-    blurb: "The home screen for every student — everything important in one view.",
-    items: [
-      "Personalized dashboard by role and needs",
-      "Quick actions: meal, transport seat, medical appointment",
-      "Latest official notices and club announcements",
-      "Upcoming events and notifications",
-    ],
-  },
-  {
-    no: "4.3",
-    title: "PDF & Notes Drive · Notes Engine · PDF Maker",
-    blurb: "A notebook-style system with LLM-style capabilities.",
-    items: [
-      "Cloud storage for lecture PDFs and notes with folders & sharing",
-      "Notes Engine: write and organize; AI tags and summarizes",
-      "PDF Maker: notes → clean PDFs, merge, basic formatting",
-      "Content-aware search — not just file names",
-    ],
-  },
-  {
-    no: "4.4",
-    title: "Medical Appointment Booking",
-    blurb: "Digital help for the campus medical center.",
-    items: [
-      "View doctor / medical staff availability",
-      "Book appointments online",
-      "Reminders so slots are not missed",
-      "Privacy-controlled visit support",
-    ],
-  },
-  {
-    no: "4.5",
-    title: "Transport Online Ticket",
-    blurb: "Like an online ticket counter for campus buses.",
-    items: [
-      "Clear routes and schedules",
-      "Book a seat online — capacity-aware",
-      "Digital ticket (QR) for boarding",
-      "Bus tracking so students stop guessing",
-    ],
-  },
-  {
-    no: "4.6",
-    title: "Online Meal Ticket",
-    blurb: "Digital meal tickets with a live counter for the meal ratio.",
-    items: [
-      "Claim or book meal tickets digitally",
-      "Real-time ratio: remaining slots vs. claimed",
-      "Fewer queues and paper coupons",
-      "Cafeteria staff see demand and plan better",
-    ],
-  },
-  {
-    no: "4.7",
-    title: "Official Notice Hub",
-    blurb: "One official place for academic and institutional notices.",
-    items: [
-      "Central feed: exams, results, circulars, announcements",
-      "Categories and search so notices are not buried",
-      "Alerts for urgent or high-priority notices",
-    ],
-  },
-  {
-    no: "4.8",
-    title: "Clubs, Events & Club Dashboards",
-    blurb: "Everything about NITER clubs — join, run, and manage.",
-    items: [
-      "Clubs publish events; students browse and register",
-      "Online booking & payment when required",
-      "Personalized club dashboards and member roles",
-      "Finance tracking for paid events",
-    ],
-  },
-];
-
-export const accessRows = [
-  {
-    role: "Visitor (Public)",
-    login: "No",
-    access: "View Home Page: overview, contact, AI chatbot, Medical Info (public).",
-    isNew: false,
-  },
-  {
-    role: "Student",
-    login: "Yes — University ID",
-    access: "Student Section: Notice, Materials, Booking [Meal/Transport/Medical], Result, AI, Notifications — Club/Event no longer here.",
-    isNew: false,
-  },
-  {
-    role: "Faculty / Teacher",
-    login: "Yes — Faculty ID",
-    access: "Faculty Section: Notice, Materials, Result, AI Assistant.",
-    isNew: false,
-  },
-  {
-    role: "Medical Admin (Host)",
-    login: "Yes — Admin ID",
-    access: "Medical Admin Section: update/manage info, availability & appointment activity.",
-    isNew: false,
-  },
-  {
-    role: "Event Host",
-    login: "Yes — Student ID",
-    access: "Event Mgmt Section (announcements, registration & payment, club dashboard, finance tracking) + Student Section (dual access).",
-    isNew: true,
-  },
-];
-
-export const benefits = {
-  students: [
-    "One place for campus life instead of many apps and groups",
-    "Faster booking for meals, transport, and medical visits",
-    "Better access to notes, books, study materials, and official notices",
-    "Easier club event participation with online registration and payment",
-  ],
-  teachers: [
-    "Reliable channel to publish official academic notices",
-    "Organized way to share lecture materials and PDFs",
-    "Less time on repeated manual coordination",
-    "Clearer visibility that students receive important information",
-  ],
-  operations: [
-    "Live meal ratio helps cafeteria planning and reduces waste",
-    "Clearer transport demand and seat management",
-    "Clubs become more organized with digital tools",
-    "Overall reduction in paper-based and fragmented processes",
-  ],
+export type NoteEntry = {
+  id: number;
+  title: string;
+  content: string;
+  tags: string[];
+  updated: string;
 };
 
-// Changes made to the original chart, per the updated reference (blueprint page)
-export const chartChanges = [
+export const seedNotes: NoteEntry[] = [
   {
-    title: "Centralized AI added",
-    where: "Home Page + Student & Faculty dashboards",
-    note: "Smart search, document summarization, campus chatbot, personalized suggestions — a public chatbot on the Home Page too.",
+    id: 1,
+    title: "Data Structures — Quick Recap",
+    content: "Trees: a balanced BST keeps search at O(log n). Heaps power priority queues. Graphs: BFS for shortest hops, DFS for connectivity. Practice one tree traversal per day before the midterm.",
+    tags: ["data-structures", "midterm"],
+    updated: "04 Aug",
   },
   {
-    title: "Materials expanded",
-    where: "Student & Faculty → Materials",
-    note: "PDF & Notes Drive, Notes Engine, PDF Maker, content-aware search.",
+    id: 2,
+    title: "OOP — Four Pillars",
+    content: "Encapsulation hides state behind methods. Inheritance reuses behavior. Polymorphism lets one interface drive many implementations. Abstraction keeps callers simple.",
+    tags: ["oop", "cse-203"],
+    updated: "03 Aug",
   },
   {
-    title: "Booking expanded",
-    where: "Student → Booking",
-    note: "Meal Ticket (live ratio), Transport Ticket (routes, QR, tracking), Medical Appointment (availability, reminders).",
+    id: 3,
+    title: "DB Normalization (1NF–3NF)",
+    content: "1NF: atomic columns. 2NF: no partial dependency on a composite key. 3NF: no transitive dependency. In practice, stop at 3NF for most schemas.",
+    tags: ["database"],
+    updated: "01 Aug",
   },
-  {
-    title: "Medical Admin Section expanded",
-    where: "Medical Admin column",
-    note: "Availability management, appointment tracking, privacy-controlled visit activity.",
-  },
-  {
-    title: "Club removed from Student Section",
-    where: "Student Section",
-    note: "Club/Event no longer sits in the plain Student Section list.",
-    highlight: true,
-  },
-  {
-    title: "Event Host role added",
-    where: "After “Identify User Role”",
-    note: "New sibling role with an Event Mgmt Section and dual access into the Student Section.",
-    highlight: true,
-  },
+];
+
+export type Appointment = {
+  id: number;
+  doctor: string;
+  date: string;
+  patient: string;
+  status: "booked" | "completed";
+};
+
+export const seedAppointments: Appointment[] = [
+  { id: 1, doctor: "Dr. Tanvir Hossain", date: "06 Aug, 3:00 pm", patient: "CSE 2nd yr", status: "booked" },
+  { id: 2, doctor: "Dr. Ayesha Rahman", date: "06 Aug, 11:30 am", patient: "BBA 1st yr", status: "booked" },
+];
+
+export type VisitRecord = {
+  id: number;
+  date: string;
+  doctor: string;
+  patient: string;
+  note: string;
+  status: "checked-in" | "completed";
+};
+
+export const seedVisitRecords: VisitRecord[] = [
+  { id: 1, date: "04 Aug", doctor: "Dr. Ayesha Rahman", patient: "CSE 3rd yr", note: "Seasonal flu — rest, fluids, paracetamol", status: "completed" },
+  { id: 2, date: "03 Aug", doctor: "Dr. Kamal Uddin", patient: "EEE 2nd yr", note: "Minor sprain — ankle wrap advised", status: "completed" },
+  { id: 3, date: "03 Aug", doctor: "Dr. Tanvir Hossain", patient: "BBA 1st yr", note: "Migraine — follow-up in 5 days", status: "completed" },
+  { id: 4, date: "02 Aug", doctor: "Dr. Nusrat Jahan", patient: "CSE 1st yr", note: "Dental checkup — cavity filling scheduled", status: "checked-in" },
+];
+
+export type Announcement = {
+  id: number;
+  club: string;
+  title: string;
+  body: string;
+  date: string;
+};
+
+export const seedAnnouncements: Announcement[] = [
+  { id: 1, club: "AI & Robotics Club", title: "Hands-on robotics workshop this Friday", body: "Lab 3, 4 pm. No prior experience needed — bring a laptop.", date: "05 Aug" },
+  { id: 2, club: "Cultural Society", title: "Cultural Night auditions open", body: "Auditions at the Open Air Stage, Saturday 11 am.", date: "04 Aug" },
+  { id: 3, club: "Sports Club", title: "Football trials — register by Thursday", body: "Trials on the Main Field, Friday 5 pm.", date: "03 Aug" },
+];
+
+export type PaymentRecord = {
+  id: number;
+  event: string;
+  club: string;
+  amount: number;
+  method: string;
+  status: "paid" | "pending";
+};
+
+export const seedPayments: PaymentRecord[] = [
+  { id: 1, event: "TechNova 2026", club: "AI & Robotics Club", amount: 500, method: "bKash", status: "paid" },
+  { id: 2, event: "Annual Cultural Night", club: "Cultural Society", amount: 300, method: "Rocket", status: "paid" },
+  { id: 3, event: "Football Tournament", club: "Sports Club", amount: 100, method: "bKash", status: "pending" },
+];
+
+export type MedicalContentItem = {
+  id: number;
+  title: string;
+  published: boolean;
+};
+
+export const seedMedicalContent: MedicalContentItem[] = [
+  { id: 1, title: "Dengue Prevention Guide", published: true },
+  { id: 2, title: "First Aid Basics", published: true },
+  { id: 3, title: "Mental Health & Counseling Services", published: false },
+  { id: 4, title: "Seasonal Flu — What to Do", published: true },
 ];

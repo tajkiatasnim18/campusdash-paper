@@ -300,11 +300,11 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
           </Card>
 
           <p className="mt-6 text-center text-[11.5px] leading-5 text-ink-soft">
-            Need the map first?{" "}
-            <Link to="/flowchart" className="font-medium text-ink underline underline-offset-4 hover:text-newsprint">
-              Read the blueprint
+            Already signed in?{" "}
+            <Link to="/dashboard" className="font-medium text-ink underline underline-offset-4 hover:text-newsprint">
+              Jump straight to the portal
             </Link>{" "}
-            — every role, section, and route in one chart.
+            — every role has its own desk of pages.
           </p>
         </div>
       </main>
